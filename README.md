@@ -12,7 +12,7 @@ Reads the default (current) dfx identity, compatable with unencrypted pems
 
 1. `npm i -g cover-builder`
 2. cd to dfx project root
-3. `coverage`
+3. `cover-builder`
 
 ### Repo
 
@@ -20,3 +20,4 @@ Reads the default (current) dfx identity, compatable with unencrypted pems
 2. `cd coverage`
 3. pull node packages
 4. `npm install -g .`
+5. `cover-builder`
