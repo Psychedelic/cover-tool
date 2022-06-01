@@ -12,4 +12,5 @@ run `coverage` from a dfx project directory
 
 1. clone repo
 2. cd coverage
-3. `npm install -g .`
+3. pull node packages
+4. `npm install -g .`
