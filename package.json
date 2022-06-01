@@ -1,8 +1,8 @@
 {
-    "name": "coverage",
-    "version": "1.0.0",
+    "name": "cover-builder",
+    "version": "1.0.1",
     "description": "sign and trigger a build submission for cover with the dfx user identity",
-    "main": "main.js",
+    "main": "cover-build.js",
     "scripts": {
         "test": "echo 'no tests'"
     },
@@ -16,6 +16,7 @@
         "@dfinity/candid": "^0.10.4",
         "@dfinity/identity": "^0.10.4",
         "@dfinity/principal": "^0.10.4",
+        "node-fetch": "^3.2.4",
         "readline-sync": "^1.4.10",
         "sha256": "^0.2.0",
         "tweetnacl": "^1.0.3"
