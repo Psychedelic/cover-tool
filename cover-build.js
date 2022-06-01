@@ -81,7 +81,7 @@ const signature = identity.sign(Buffer.from(timestamp.toString())).then(signatur
         "canisterId": cover_config.canisterId || readlineSync.question("Canister ID: "),
         "canisterName": cover_config.canisterName || readlineSync.question("Canister Name: "),
         "repoUrl": cover_config.repoUrl || readlineSync.question("Repo URL (eg; psychedelic/dip721): "),
-        "optimizeCount": cover_config.optimizeCount >= 0 ? cover_config.optimizeCount : readlineSync.question("Optimize count: "),
+        "optimizeCount": cover_config.optimizeCount >= 0 ? cover_config.optimizeCount : Number(readlineSync.question("Optimize count: ")),
         "repoAccessToken": COVER_ACCESS_TOKEN,
         "commitHash": execSync('git rev-parse HEAD').toString().trim(),
         "rustVersion": cover_config.rustVersion || execSync('rustc --version').toString().split(" ")[1],
