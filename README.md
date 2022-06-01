@@ -1,10 +1,12 @@
-# Coverage - Cover build submission
+# `cover-builder` - Cover build submission tool
 
 Sign and submit a cover build request easily!
 
-Communicates with the [cover-validator](https://github.com/Psychedelic/cover-validator) for [cover](https://app.covercode.ooo/)
+Communicates with the [cover-validator](https://github.com/Psychedelic/cover-validator) API for [cover](https://app.covercode.ooo/)
 
-Reads the default (current) dfx identity, compatable with unencrypted pems
+Reads the default (current) dfx identity, compatable with unencrypted pems.
+
+Stores configuration in a `cover.json` file in the current working directory
 
 ## Installation/Usage
 
