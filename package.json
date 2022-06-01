@@ -1,6 +1,6 @@
 {
     "name": "cover-builder",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "sign and trigger a build submission for cover with the dfx user identity",
     "main": "cover-build.js",
     "scripts": {
@@ -9,7 +9,7 @@
     "author": "ossian <self@ossian.dev>",
     "license": "GPL-3.0",
     "bin": {
-        "coverage": "cover-build.js"
+        "cover-builder": "cover-build.js"
     },
     "dependencies": {
         "@dfinity/agent": "^0.10.4",
