@@ -7,8 +7,7 @@ const readlineSync = require('readline-sync');
 const fetch = (...args) =>
 import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
-const DFX_PEM_PATH = path.join(process.env.HOME, ".config", "dfx");
-const COVER_JSON_PATH = path.join(process.cwd(), "cover.json");
+const COVER_JSON_PATH = process.env.COVER_JSON_PATH || path.join(process.cwd(), "cover.json");
 const COVER_ACCESS_TOKEN = process.env.COVER_ACCESS_TOKEN || null;
 if (!COVER_ACCESS_TOKEN) {
     console.warn("/!\\ COVER_ACCESS_TOKEN is not set");
@@ -16,10 +15,11 @@ if (!COVER_ACCESS_TOKEN) {
 
 // prefer the env variable, then dfx.json version, or run dfx --version.
 const DFX_VERSION = process.env.DFX_VERSION || JSON.parse(fs.readFileSync(path.join(process.cwd(), "dfx.json"), "utf8")).version || execSync('dfx --version').toString().split(" ")[1].trim();
+const DFX_PEM_PATH = path.join(process.env.HOME, ".config", "dfx");
 const DFX_USER = JSON.parse(fs.readFileSync(path.join(DFX_PEM_PATH, "identity.json"), "utf8"))?.default;
-const KEY_PATH = path.join(DFX_PEM_PATH, "identity", DFX_USER, "identity.pem");
+const KEY_PATH = process.env.KEY_PATH || path.join(DFX_PEM_PATH, "identity", DFX_USER, "identity.pem");
 
-console.log("KEY_PATH", KEY_PATH);
+console.log("KEY_PATH: ", KEY_PATH);
 
 let pem = fs.readFileSync(KEY_PATH).toString();
 
