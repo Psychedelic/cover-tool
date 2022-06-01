@@ -1,6 +1,6 @@
 {
     "name": "cover-builder",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "description": "sign and trigger a build submission for cover with the dfx user identity",
     "main": "cover-build.js",
     "scripts": {

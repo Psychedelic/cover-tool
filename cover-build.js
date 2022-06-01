@@ -11,7 +11,7 @@ const DFX_PEM_PATH = path.join(process.env.HOME, ".config", "dfx");
 const COVER_JSON_PATH = path.join(process.cwd(), "cover.json");
 const COVER_ACCESS_TOKEN = process.env.COVER_ACCESS_TOKEN || null;
 if (!COVER_ACCESS_TOKEN) {
-    console.warn("/!\ COVER_ACCESS_TOKEN is not set");
+    console.warn("/!\\ COVER_ACCESS_TOKEN is not set");
 }
 
 // prefer the env variable, then dfx.json version, or run dfx --version.
