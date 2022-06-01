@@ -87,9 +87,9 @@ const timestamp = Date.now();
 const signature = identity.sign(Buffer.from(timestamp.toString())).then(signature => {
     cover_config = {
         "ownerId": identity.getPrincipal().toText(),
-        "canisterId": cover_config.canisterId || "iqvo2-7qaaa-aaaam-qacxa-cai",
-        "canisterName": cover_config.canisterName || "crowns-test",
-        "repoUrl": cover_config.repoUrl || "psychedelic/crowns",
+        "canisterId": cover_config.canisterId,
+        "canisterName": cover_config.canisterName,
+        "repoUrl": cover_config.repoUrl,
         "repoAccessToken": COVER_ACCESS_TOKEN,
         "commitHash": execSync('git rev-parse HEAD').toString().trim(),
         "rustVersion": cover_config.rustVersion || execSync('rustc --version').toString().split(" ")[1],
