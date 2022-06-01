@@ -3,8 +3,9 @@ const fs = require('fs');
 const { Ed25519KeyIdentity, Secp256k1KeyIdentity } = require("@dfinity/identity");
 const { execSync } = require('child_process');
 const path = require('path');
-const fetch = require('node-fetch');
-var readlineSync = require('readline-sync');
+const readlineSync = require('readline-sync');
+const fetch = (...args) =>
+import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 const DFX_PEM_PATH = path.join(process.env.HOME, ".config", "dfx");
 const COVER_JSON_PATH = path.join(process.cwd(), "cover.json");
