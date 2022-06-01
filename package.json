@@ -1,0 +1,23 @@
+{
+    "name": "cover-build",
+    "version": "1.0.0",
+    "description": "sign and trigger a build submission for cover with the dfx user identity",
+    "main": "main.js",
+    "scripts": {
+        "test": "echo 'no tests'"
+    },
+    "author": "ossian <self@ossian.dev>",
+    "license": "GPL-3.0",
+    "bin": {
+        "cover-build": "cover-build.js"
+    },
+    "dependencies": {
+        "@dfinity/agent": "^0.10.4",
+        "@dfinity/candid": "^0.10.4",
+        "@dfinity/identity": "^0.10.4",
+        "@dfinity/principal": "^0.10.4",
+        "readline-sync": "^1.4.10",
+        "sha256": "^0.2.0",
+        "tweetnacl": "^1.0.3"
+    }
+}
