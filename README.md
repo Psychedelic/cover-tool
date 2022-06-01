@@ -22,4 +22,5 @@ Stores configuration in a `cover.json` file in the current working directory
 2. `cd coverage`
 3. pull node packages
 4. `npm install -g .`
-5. `cover-builder`
+5. cd to dfx project root
+6. `cover-builder`
