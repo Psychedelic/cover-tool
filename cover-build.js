@@ -5,12 +5,12 @@ const { execSync } = require('child_process');
 const path = require('path');
 const readlineSync = require('readline-sync');
 const fetch = (...args) =>
-import('node-fetch').then(({ default: fetch }) => fetch(...args));
+    import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 const COVER_JSON_PATH = process.env.COVER_JSON_PATH || path.join(process.cwd(), "cover.json");
 const COVER_ACCESS_TOKEN = process.env.COVER_ACCESS_TOKEN || null;
 if (!COVER_ACCESS_TOKEN) {
-    console.warn("/!\\ COVER_ACCESS_TOKEN is not set");
+    console.warn("(!) COVER_ACCESS_TOKEN is not set");
 }
 
 // prefer the env variable, then dfx.json version, or run dfx --version.
@@ -62,47 +62,39 @@ try {
     try {
         identity = Secp256k1KeyIdentity.fromSecretKey(key);
     } catch {
-        console.log("Invalid key");
+        console.log("(e) Invalid key");
         process.exit(1);
     }
 }
-try {
-    fs.writeFileSync(COVER_JSON_PATH, JSON.stringify(cover_config, null, 2));
-} catch (e) {
-    console.log("Failed to write cover configuration to", COVER_JSON_PATH);
-}
+
 let cover_config = {};
 if (fs.existsSync(COVER_JSON_PATH)) {
     cover_config = JSON.parse(fs.readFileSync(COVER_JSON_PATH, "utf8"));
 } else {
-    console.log("No cover configuration found, creating one");
-    cover_config = {
-        "canisterId": readlineSync.question("Canister ID: "),
-        "canisterName": readlineSync.question("Canister Name: "),
-        "repoUrl": readlineSync.question("Repo URL (github): "),
-        "optimizeCount": readlineSync.question("Optimize count: "),
-    }
+    console.log("(i) No existing cover configuration found");
 }
 
 const timestamp = Date.now();
 const signature = identity.sign(Buffer.from(timestamp.toString())).then(signature => {
     cover_config = {
         "ownerId": identity.getPrincipal().toText(),
-        "canisterId": cover_config.canisterId,
-        "canisterName": cover_config.canisterName,
-        "repoUrl": cover_config.repoUrl,
+        "canisterId": cover_config.canisterId || readlineSync.question("Canister ID: "),
+        "canisterName": cover_config.canisterName || readlineSync.question("Canister Name: "),
+        "repoUrl": cover_config.repoUrl || readlineSync.question("Repo URL (eg; psychedelic/dip721): "),
+        "optimizeCount": cover_config.optimizeCount || readlineSync.question("Optimize count: "),
         "repoAccessToken": COVER_ACCESS_TOKEN,
         "commitHash": execSync('git rev-parse HEAD').toString().trim(),
         "rustVersion": cover_config.rustVersion || execSync('rustc --version').toString().split(" ")[1],
         "dfxVersion": cover_config.dfxVersion || DFX_VERSION,
-        "optimizeCount": cover_config.optimizeCount || 1,
         "publicKey": Buffer.from(identity.getPublicKey().toRaw()).toString('hex'),
         "signature": Buffer.from(signature).toString('hex'),
         timestamp
     };
 
+    console.log("(i) Submitting cover build for", cover_config.canisterName, "configuration:");
+    console.group();
     console.log(cover_config);
-    console.log("Submitting cover build for...");
+    console.groupEnd();
 
     fetch('https://h969vfa2pa.execute-api.us-east-1.amazonaws.com/production/build', {
         method: 'post',
@@ -110,20 +102,20 @@ const signature = identity.sign(Buffer.from(timestamp.toString())).then(signatur
         headers: { 'Content-Type': 'application/json' }
     }).then(res => {
         if (res.ok) {
-            console.log("Cover build submitted");
+            console.log("(i) Cover build submitted");
         } else {
-            console.log("Cover build submission failed");
+            console.log("(X) Cover build submission failed, check the configuration (cover.json)", res.err);
+        }
+
+        delete cover_config["repoAccessToken"];
+
+        console.log("(i) Saving cover configuration to", COVER_JSON_PATH);
+        try {
+            fs.writeFileSync(COVER_JSON_PATH, JSON.stringify(cover_config, null, 2));
+        } catch (e) {
+            console.log("(X) Failed to write cover configuration to", COVER_JSON_PATH, ":", e);
         }
     });
-
-    delete cover_config["repoAccessToken"];
-
-    console.log("Saving cover configuration to", COVER_JSON_PATH);
-    try {
-        fs.writeFileSync(COVER_JSON_PATH, JSON.stringify(cover_config, null, 2));
-    } catch (e) {
-        console.log("Failed to write cover configuration to", COVER_JSON_PATH, ":", e);
-    }
 }).catch(err => {
     console.log(err);
     process.exit(1);
