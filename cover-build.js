@@ -17,9 +17,17 @@ if (!COVER_ACCESS_TOKEN) {
 const DFX_VERSION = process.env.DFX_VERSION || JSON.parse(fs.readFileSync(path.join(process.cwd(), "dfx.json"), "utf8")).version || execSync('dfx --version').toString().split(" ")[1].trim();
 const DFX_PEM_PATH = path.join(process.env.HOME, ".config", "dfx");
 const DFX_USER = JSON.parse(fs.readFileSync(path.join(DFX_PEM_PATH, "identity.json"), "utf8"))?.default;
-const KEY_PATH = process.env.KEY_PATH || path.join(DFX_PEM_PATH, "identity", DFX_USER, "identity.pem");
+let KEY_PATH = process.env.KEY_PATH;
 
-console.log("KEY_PATH: ", KEY_PATH);
+if (!DFX_USER && !KEY_PATH) {
+    console.error("(!) Could not find a default user in ~/.config/dfx/identity.json");
+    KEY_PATH = readlineSync.question("Enter the path to your identity.pem: ");
+} else {
+    KEY_PATH = path.join(DFX_PEM_PATH, "identity", DFX_USER, "identity.pem")
+}
+
+
+console.log(`(i) Using dfx identity \`${DFX_USER}\` (${KEY_PATH})`);
 
 let pem = fs.readFileSync(KEY_PATH).toString();
 
@@ -67,57 +75,80 @@ try {
     }
 }
 
-let cover_config = {};
+
+var COMMIT_HASH;
+try {
+    COMMIT_HASH = execSync('git rev-parse HEAD').toString().trim();
+    console.log(`(i) Using commit hash \`${COMMIT_HASH}\` (HEAD)\n`);
+} catch {
+    COMMIT_HASH = readlineSync.question("(?) Commit hash: ");
+}
+
+var cover_config;
 if (fs.existsSync(COVER_JSON_PATH)) {
     cover_config = JSON.parse(fs.readFileSync(COVER_JSON_PATH, "utf8"));
+}
+
+if (!cover_config || readlineSync.keyInYN("(?) Edit existing cover configuration?")) {
+    cover_config = {
+        "ownerId": identity.getPrincipal().toText(),
+        "canisterId": readlineSync.question("(?) Canister ID ($<defaultInput>) ", { defaultInput: cover_config.canisterId }),
+        "canisterName": readlineSync.question("(?) Canister Name ($<defaultInput>): ", { defaultInput: cover_config.canisterName }),
+        "repoUrl": readlineSync.question("(?) Repo URL ($<defaultInput>): ", { defaultInput: cover_config.repoUrl || "psychedelic/dip721" }),
+        "commitHash": readlineSync.question("(?) Commit hash ($<defaultInput>): ", { defaultInput: COMMIT_HASH }),
+        "rustVersion": readlineSync.question("(?) Rust version ($<defaultInput>): ", { defaultInput: cover_config.rustVersion || execSync('rustc --version').toString().split(" ")[1].trim() }),
+        "dfxVersion": readlineSync.question("(?) Dfinity version ($<defaultInput>): ", { defaultInput: cover_config.dfxVersion || DFX_VERSION }),
+        "optimizeCount": Number(readlineSync.question("(?) Optimize count ($<defaultInput>): ", { defaultInput: (Number(cover_config.optimizeCount) >= 0) ? cover_config.optimizeCount : 1 })),
+    };
 } else {
-    console.log("(i) No existing cover configuration found");
+    cover_config = {
+        ...cover_config,
+        "commitHash": COMMIT_HASH || readlineSync.question("(?) Commit hash: "),
+    }
 }
 
 const timestamp = Date.now();
 const signature = identity.sign(Buffer.from(timestamp.toString())).then(signature => {
-    cover_config = {
-        "ownerId": identity.getPrincipal().toText(),
-        "canisterId": cover_config.canisterId || readlineSync.question("Canister ID: "),
-        "canisterName": cover_config.canisterName || readlineSync.question("Canister Name: "),
-        "repoUrl": cover_config.repoUrl || readlineSync.question("Repo URL (eg; psychedelic/dip721): "),
-        "optimizeCount": cover_config.optimizeCount >= 0 ? cover_config.optimizeCount : Number(readlineSync.question("Optimize count: ")),
-        "repoAccessToken": COVER_ACCESS_TOKEN,
-        "commitHash": execSync('git rev-parse HEAD').toString().trim(),
-        "rustVersion": cover_config.rustVersion || execSync('rustc --version').toString().split(" ")[1],
-        "dfxVersion": cover_config.dfxVersion || DFX_VERSION,
+    const request = {
+        ...cover_config,
+        "repoAccessToken": COVER_ACCESS_TOKEN || readlineSync.question("Repo access token: "),
         "publicKey": Buffer.from(identity.getPublicKey().toRaw()).toString('hex'),
         "signature": Buffer.from(signature).toString('hex'),
         timestamp
     };
 
-    console.log("(i) Submitting cover build for", cover_config.canisterName, "configuration:");
+    console.log("\nSubmitting cover build for", request.canisterName, "configuration:");
     console.group();
-    console.log(cover_config);
+    console.log("\n", request, "\n");
     console.groupEnd();
 
-    fetch('https://h969vfa2pa.execute-api.us-east-1.amazonaws.com/production/build', {
+    // fetch('https://h969vfa2pa.execute-api.us-east-1.amazonaws.com/production/build', {
+    fetch('https://h969vfa2pa.execute-api.us-east-1.amazonaws.com/production/dryrun', {
         method: 'post',
-        body: JSON.stringify(cover_config),
+        body: JSON.stringify(request),
         headers: { 'Content-Type': 'application/json' }
     }).then(res => {
         if (res.ok) {
-            console.log("(i) Cover build submitted");
+            console.log("(i) Cover build submitted!");
         } else {
-            console.log("(X) Cover build submission failed, check the configuration (cover.json)", res.err);
+            console.log("(X) Cover build failed!");
+            
+            res.json().then(json => {
+                console.log("Response: ", res.statusText, `(${res.status})\n`, json);
+            });
         }
-
-        delete cover_config["repoAccessToken"];
-
-        console.log("(i) Saving cover configuration to", COVER_JSON_PATH);
-        try {
-            fs.writeFileSync(COVER_JSON_PATH, JSON.stringify(cover_config, null, 2));
-        } catch (e) {
-            console.log("(X) Failed to write cover configuration to", COVER_JSON_PATH, ":", e);
-        }
+    }).catch(e => {
+        console.log("(X) Cover build submission failed:", e);
     });
 }).catch(err => {
     console.log(err);
     process.exit(1);
+}).then(() => {
+    console.log("(i) Saving cover configuration to", COVER_JSON_PATH);
+    try {
+        fs.writeFileSync(COVER_JSON_PATH, JSON.stringify(cover_config, null, 2));
+    } catch (e) {
+        console.log("(X) Failed to write cover configuration to", COVER_JSON_PATH, ":", e);
+    }
 });
 
