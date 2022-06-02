@@ -1,6 +1,6 @@
 {
     "name": "cover-builder",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "CLI tool to sign and build cover verification requests using a dfx identity",
     "main": "cover-build.js",
     "scripts": {

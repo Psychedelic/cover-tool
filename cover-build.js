@@ -109,9 +109,8 @@ if (!cover_config || readlineSync.keyInYN("(?) Edit existing cover configuration
 
 const timestamp = Date.now();
 const signature = identity.sign(Buffer.from(timestamp.toString())).then(signature => {
-    const request = {
+    cover_config = {
         ...cover_config,
-        "repoAccessToken": COVER_ACCESS_TOKEN || readlineSync.question("Repo access token: "),
         "publicKey": Buffer.from(identity.getPublicKey().toRaw()).toString('hex'),
         "signature": Buffer.from(signature).toString('hex'),
         timestamp
@@ -122,8 +121,7 @@ const signature = identity.sign(Buffer.from(timestamp.toString())).then(signatur
     console.log("\n", request, "\n");
     console.groupEnd();
 
-    // fetch('https://h969vfa2pa.execute-api.us-east-1.amazonaws.com/production/build', {
-    fetch('https://h969vfa2pa.execute-api.us-east-1.amazonaws.com/production/dryrun', {
+    fetch('https://h969vfa2pa.execute-api.us-east-1.amazonaws.com/production/build', {
         method: 'post',
         body: JSON.stringify(request),
         headers: { 'Content-Type': 'application/json' }
