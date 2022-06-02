@@ -116,9 +116,9 @@ const signature = identity.sign(Buffer.from(timestamp.toString())).then(signatur
         timestamp
     };
 
-    console.log("\nSubmitting cover build for", request.canisterName, "configuration:");
+    console.log("\nSubmitting cover build for", cover_config.canisterName, "configuration:");
     console.group();
-    console.log("\n", request, "\n");
+    console.log("\n", { ...cover_config, "repoAccessToken": "-snip-" }, "\n");
     console.groupEnd();
 
     fetch('https://h969vfa2pa.execute-api.us-east-1.amazonaws.com/production/build', {
