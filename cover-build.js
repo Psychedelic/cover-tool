@@ -103,7 +103,7 @@ if (!cover_config || readlineSync.keyInYN("(?) Edit existing cover configuration
 } else {
     cover_config = {
         ...cover_config,
-        "commitHash": COMMIT_HASH || readlineSync.question("(?) Commit hash: "),
+        "commitHash": COMMIT_HASH,
     }
 }
 
@@ -123,14 +123,17 @@ const signature = identity.sign(Buffer.from(timestamp.toString())).then(signatur
 
     fetch('https://h969vfa2pa.execute-api.us-east-1.amazonaws.com/production/build', {
         method: 'post',
-        body: JSON.stringify(request),
+        body: JSON.stringify({
+            ...cover_config,
+            "repoAccessToken": COVER_ACCESS_TOKEN,
+        }),
         headers: { 'Content-Type': 'application/json' }
     }).then(res => {
         if (res.ok) {
             console.log("(i) Cover build submitted!");
         } else {
             console.log("(X) Cover build failed!");
-            
+
             res.json().then(json => {
                 console.log("Response: ", res.statusText, `(${res.status})\n`, json);
             });
