@@ -17,7 +17,7 @@ Stores configuration in a `cover.json` file in the current working directory
 ### Repo
 
 1. clone repo
-2. `cd coverage`
+2. `cd cover-builder`
 3. pull node packages
 4. `npm install -g .`
 
