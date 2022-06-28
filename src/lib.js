@@ -66,36 +66,36 @@ const publishToCover = async (
       console.log("\n", { ...cover_config, repoAccessToken: "-snip-" }, "\n");
       console.groupEnd();
 
-      //   fetch(
-      //     "https://h969vfa2pa.execute-api.us-east-1.amazonaws.com/production/build",
-      //     {
-      //       method: "post",
-      //       body: JSON.stringify({
-      //         repoAccessToken,
-      //         ...cover_config,
-      //       }),
-      //       headers: { "Content-Type": "application/json" },
-      //     }
-      //   )
-      //     .then((res) => {
-      //       if (res.ok) {
-      //         console.log("(i) Cover build submitted!");
-      //       } else {
-      //         console.log("(X) Cover build failed!");
+      fetch(
+        "https://h969vfa2pa.execute-api.us-east-1.amazonaws.com/production/build",
+        {
+          method: "post",
+          body: JSON.stringify({
+            repoAccessToken,
+            ...cover_config,
+          }),
+          headers: { "Content-Type": "application/json" },
+        }
+      )
+        .then((res) => {
+          if (res.ok) {
+            console.log("(i) Cover build submitted!");
+          } else {
+            console.log("(X) Cover build failed!");
 
-      //         res.json().then((json) => {
-      //           console.log(
-      //             "Response: ",
-      //             res.statusText,
-      //             `(${res.status})\n`,
-      //             json
-      //           );
-      //         });
-      //       }
-      //     })
-      //     .catch((e) => {
-      //       console.log("(X) Cover build submission failed:", e);
-      //     });
+            res.json().then((json) => {
+              console.log(
+                "Response: ",
+                res.statusText,
+                `(${res.status})\n`,
+                json
+              );
+            });
+          }
+        })
+        .catch((e) => {
+          console.log("(X) Cover build submission failed:", e);
+        });
     })
     .catch((err) => {
       console.log(err);
